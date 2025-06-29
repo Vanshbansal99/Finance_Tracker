@@ -1,0 +1,104 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 30px auto; padding: 20px; background: #f9f9f9; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  <h1 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">📊 Financial Report</h1>
+
+  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+    <div style="flex: 1 1 400px;">
+      <canvas id="pieChart"></canvas>
+    </div>
+    <div style="flex: 1 1 400px;">
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Embed data safely -->
+{{ month_labels|json_script:"month-labels" }}
+{{ income_data|json_script:"income-data" }}
+{{ expense_data|json_script:"expense-data" }}
+{{ total_income|json_script:"total-income" }}
+{{ total_expense|json_script:"total-expense" }}
+
+<script>
+const monthLabels = JSON.parse(document.getElementById('month-labels').textContent);
+const incomeData = JSON.parse(document.getElementById('income-data').textContent);
+const expenseData = JSON.parse(document.getElementById('expense-data').textContent);
+const totalIncome = JSON.parse(document.getElementById('total-income').textContent);
+const totalExpense = JSON.parse(document.getElementById('total-expense').textContent);
+
+// Pie Chart
+const pieCtx = document.getElementById('pieChart').getContext('2d');
+new Chart(pieCtx, {
+  type: 'pie',
+  data: {
+    labels: ['Income', 'Expense'],
+    datasets: [{
+      data: [totalIncome, totalExpense],
+      backgroundColor: ['#27ae60', '#e74c3c'],
+      borderWidth: 1
+    }]
+  },
+  options: {
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          font: {
+            size: 14
+          }
+        }
+      }
+    }
+  }
+});
+
+// Bar Chart
+const barCtx = document.getElementById('barChart').getContext('2d');
+new Chart(barCtx, {
+  type: 'bar',
+  data: {
+    labels: monthLabels,
+    datasets: [
+      {
+        label: 'Income',
+        data: incomeData,
+        backgroundColor: '#27ae60',
+        borderRadius: 6
+      },
+      {
+        label: 'Expense',
+        data: expenseData,
+        backgroundColor: '#e74c3c',
+        borderRadius: 6
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      x: {
+        grid: { display: false }
+      },
+      y: {
+        grid: { color: '#ecf0f1' },
+        beginAtZero: true
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          font: {
+            size: 14
+          }
+        }
+      }
+    }
+  }
+});
+</script>
+{% endblock %}
